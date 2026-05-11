@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scroll-Scrub Hero — пошаговая инструкция</title>
+  <meta name="description" content="Полный пайплайн: 2 AI-картинки → 7-секундное видео (lumalabs.ai / Kling 3.0) → scroll-driven hero в Next.js с GSAP ScrollTrigger">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface2: #1e1e1e;
+      --border: #2a2a2a;
+      --accent: #ff6b00;
+      --accent2: #ffb280;
+      --green: #00c875;
+      --blue: #4d9fff;
+      --purple: #b060ff;
+      --text: #e8e8e8;
+      --muted: #888;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* HEADER */
+    .hero {
+      background: linear-gradient(135deg, #0f0f0f 0%, #1a0a00 50%, #0f0f0f 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 64px 24px 48px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,107,0,0.15);
+      border: 1px solid rgba(255,107,0,0.4);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #fff 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+    .hero-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+    .flow-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .flow-arrow { color: var(--accent); font-size: 18px; }
+
+    /* LAYOUT */
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    /* TOC */
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 40px 0;
+    }
+    .toc h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .toc ol {
+      padding-left: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 32px;
+    }
+    @media (max-width: 560px) { .toc ol { grid-template-columns: 1fr; } }
+    .toc a { color: var(--text); text-decoration: none; font-size: 14px; }
+    .toc a:hover { color: var(--accent); }
+
+    /* SECTION */
+    .step {
+      margin: 48px 0;
+      border-left: 3px solid var(--border);
+      padding-left: 28px;
+    }
+    .step.step--active { border-left-color: var(--accent); }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      border-radius: 50%;
+      margin-bottom: 12px;
+    }
+    .step h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .step-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    /* TOOL CARD */
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 12px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .tool-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .tool-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .tool-card p { font-size: 13px; color: var(--muted); margin: 0; }
+    .tool-link {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--blue);
+      text-decoration: none;
+      font-family: var(--mono);
+    }
+    .tool-link:hover { text-decoration: underline; }
+
+    /* CODE BLOCK */
+    .code-block {
+      background: #0d0d0d;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 16px 0;
+    }
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: var(--mono);
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+    pre {
+      padding: 18px 20px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.65;
+      color: #cdd6f4;
+    }
+    .kw { color: #cba6f7; }
+    .str { color: #a6e3a1; }
+    .cmt { color: #585b70; }
+    .num { color: #fab387; }
+    .cls { color: #89dceb; }
+    .fn { color: #89b4fa; }
+
+    /* PROMPT BLOCK */
+    .prompt-block {
+      background: linear-gradient(135deg, #0d1117 0%, #0d0d1a 100%);
+      border: 1px solid #30305a;
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin: 16px 0;
+      position: relative;
+    }
+    .prompt-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+    .prompt-block p {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: #cdd6f4;
+      line-height: 1.6;
+    }
+
+    /* SKILL INVOKE */
+    .skill-invoke {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(77,159,255,0.08);
+      border: 1px solid rgba(77,159,255,0.3);
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin: 8px 0;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--blue);
+    }
+    .skill-invoke .slash { color: var(--accent); font-weight: 800; }
+
+    /* SETTINGS TABLE */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin: 16px 0;
+    }
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      background: var(--surface2);
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    .badge-on {
+      display: inline-block;
+      background: rgba(0,200,117,0.15);
+      color: var(--green);
+      border: 1px solid rgba(0,200,117,0.3);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .badge-off {
+      display: inline-block;
+      background: rgba(255,60,60,0.12);
+      color: #ff6b6b;
+      border: 1px solid rgba(255,60,60,0.25);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* WARNING / TIP */
+    .callout {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 13px;
+      display: flex;
+      gap: 10px;
+    }
+    .callout.warn {
+      background: rgba(255,107,0,0.08);
+      border: 1px solid rgba(255,107,0,0.25);
+      color: var(--accent2);
+    }
+    .callout.tip {
+      background: rgba(0,200,117,0.06);
+      border: 1px solid rgba(0,200,117,0.2);
+      color: #a8f0d0;
+    }
+    .callout.info {
+      background: rgba(77,159,255,0.07);
+      border: 1px solid rgba(77,159,255,0.2);
+      color: #a8d0ff;
+    }
+    .callout-icon { font-size: 16px; flex-shrink: 0; }
+
+    /* DIVIDER */
+    hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+    /* SECTION HEADER */
+    .section-header {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 80px;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Claude Code Skill</div>
+  <h1>Scroll-Scrub Hero<br>Пошаговая инструкция</h1>
+  <p class="hero-sub">Два AI-изображения → 7-секундное видео → hero-секция где скролл управляет анимацией</p>
+  <div class="hero-flow">
+    <div class="flow-item">🖼 START кадр</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-item">🖼 END кадр</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-item">🎬 Видео (Luma / Kling)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-item">⚡ GSAP scroll-scrub</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-item">🚀 Vercel</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#tools">Инструменты и аккаунты</a></li>
+      <li><a href="#step1">Шаг 1 — Промпты (скилл)</a></li>
+      <li><a href="#step2">Шаг 2 — START кадр</a></li>
+      <li><a href="#step3">Шаг 3 — END кадр</a></li>
+      <li><a href="#step4">Шаг 4 — Видео из 2 картинок</a></li>
+      <li><a href="#step5">Шаг 5 — Next.js + GSAP</a></li>
+      <li><a href="#step6">Шаг 6 — Деплой</a></li>
+      <li><a href="#antipatterns">Антипаттерны</a></li>
+    </ol>
+  </div>
+
+  <!-- TOOLS -->
+  <div id="tools">
+    <div class="section-header">Требования</div>
+    <h2 style="font-size:24px;font-weight:800;margin-bottom:20px">Инструменты и аккаунты</h2>
+    <p style="color:var(--muted);margin-bottom:20px">Зарегистрируйся везде до начала работы. Бесплатных квот хватит для одного проекта.</p>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(255,107,0,0.15)">🍌</div>
+      <div>
+        <h4>Higsfield → Nano Banana 2</h4>
+        <p>Генерация START и END кадров. Бесплатный tier: ~10 генераций/день. Нужна регистрация через Google.</p>
+        <a href="https://higsfield.ai" class="tool-link" target="_blank">→ higsfield.ai</a>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(77,159,255,0.15)">🌊</div>
+      <div>
+        <h4>lumalabs.ai — Dream Machine</h4>
+        <p>Создание видео из 2 изображений. Режим <strong>«Start / End frame»</strong>. Бесплатно: 30 генераций/месяц.</p>
+        <a href="https://lumalabs.ai" class="tool-link" target="_blank">→ lumalabs.ai</a>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(176,96,255,0.15)">🎬</div>
+      <div>
+        <h4>Higsfield → Kling 3.0 (альтернатива)</h4>
+        <p>Более кинематографичный переход. Тот же Higsfield аккаунт → Create Video → Kling 3.0.</p>
+        <a href="https://higsfield.ai" class="tool-link" target="_blank">→ higsfield.ai</a>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(0,200,117,0.15)">⚡</div>
+      <div>
+        <h4>Claude Code + скилл scroll-scrub-hero</h4>
+        <p>Оркестратор всего пайплайна. Скилл уже установлен если ты читаешь это. Иначе — установи командой ниже.</p>
+        <div class="code-block" style="margin-top:8px">
+          <div class="code-header">bash <button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre>curl -fsSL https://raw.githubusercontent.com/sergeyramas/scroll-scrub-hero-skill/main/install.sh | bash</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(255,107,0,0.1)">📦</div>
+      <div>
+        <h4>Next.js проект с нужными пакетами</h4>
+        <p>Next.js 16+, gsap, @studio-freight/lenis. Если проекта нет — создай:</p>
+        <div class="code-block" style="margin-top:8px">
+          <div class="code-header">bash <button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre>npx create-next-app@latest my-site --typescript --tailwind --app
+cd my-site
+npm i gsap @studio-freight/lenis</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- STEP 1 -->
+  <div class="step step--active" id="step1">
+    <div class="step-num">1</div>
+    <h2>Генерируй промпты — скилл в Claude Code</h2>
+    <p class="step-sub">Claude Code автоматически создаст 3 готовых промпта для Nano Banana 2 и видео-перехода</p>
+
+    <div class="callout info">
+      <span class="callout-icon">💡</span>
+      <span>Этот шаг выполняет <strong>Claude Code</strong>, не ты руками. Просто напиши одну фразу — скилл сам задаст нужные вопросы и выдаст промпты.</span>
+    </div>
+
+    <p style="margin-bottom:12px"><strong>Открой Claude Code и напиши одно из:</strong></p>
+
+    <div class="skill-invoke">
+      <span class="slash">/</span>scroll-stop-prompter
+    </div>
+    <br>
+    <div style="color:var(--muted);font-size:13px;margin:8px 0 12px">— или любую из фраз:</div>
+
+    <div class="prompt-block">
+      <div class="prompt-label">Триггер-фраза</div>
+      <p>«Сгенерируй промпты для scroll-stop hero. Продукт: [название]. Метафора: [объект разбирается на части / собирается из хаоса]»</p>
+    </div>
+
+    <p style="margin:16px 0 8px"><strong>Что Claude спросит (4 вопроса):</strong></p>
+    <table>
+      <tr><th>Вопрос</th><th>Пример ответа</th></tr>
+      <tr><td>Ниша / тип бизнеса</td><td>«строительная сетка», «логистика», «кофемашины»</td></tr>
+      <tr><td>Основной объект</td><td>«стеклопластиковая сетка ROCKMESH», «фургон AnyVan»</td></tr>
+      <tr><td>Метафора превращения</td><td>«разборка на 4 компонента», «мебель вылетает из фургона»</td></tr>
+      <tr><td>Цвета бренда (hex)</td><td>«#FF6B00, #0F0F0F» — или «пропусти»</td></tr>
+    </table>
+
+    <p style="margin:16px 0 8px"><strong>Claude выдаст 3 промпта:</strong></p>
+    <div class="code-block">
+      <div class="code-header">output от Claude Code</div>
+      <pre>=== PROMPT 1 — START FRAME (Nano Banana 2) ===
+Photorealistic top-down isometric view of [объект],
+professional product photography style, soft directional lighting.
+Clean white seamless background. 16:9, 2K. No objects touch edges.
+
+=== PROMPT 2 — END FRAME (Nano Banana 2) ===
+Same [объект], same angle — but now exploded into components:
+[список компонентов floating mid-air].
+Same white background, identical lighting. 16:9, 2K. No edges.
+
+=== PROMPT 3 — VIDEO TRANSITION (Kling 3.0, 7s) ===
+Smooth 7-second transition. [описание движения].
+No text, no camera shake. Kling 3.0, multi-shot off, enhance off.</pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">✅</span>
+      <span>Сохрани все три промпта. Они нужны на шагах 2, 3 и 4.</span>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step step--active" id="step2">
+    <div class="step-num">2</div>
+    <h2>START кадр — Nano Banana 2</h2>
+    <p class="step-sub">Объект целиком, в собранном/исходном состоянии. Белый фон, 2K, 16:9.</p>
+
+    <ol style="padding-left:20px;display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+      <li>Открой <a href="https://higsfield.ai" target="_blank" style="color:var(--blue)">higsfield.ai</a> → войди через Google</li>
+      <li>В левом меню выбери <strong>Nano Banana 2</strong></li>
+      <li>Вставь PROMPT 1 из шага 1 в поле ввода</li>
+      <li>Поставь <strong>batch = 4</strong> (кнопка количества генераций)</li>
+      <li>Нажми Generate → дождись всех 4 вариантов</li>
+      <li>Выбери лучший — сохрани как <code>start.png</code> (минимум 1920×1080)</li>
+    </ol>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <span><strong>Критично: batch=4 минимум.</strong> Первый вариант редко лучший. Качество финального видео = качество кадров. 1K выглядит как «PowerPoint ребёнка».</span>
+    </div>
+
+    <table>
+      <tr><th>Параметр</th><th>Значение</th><th>Почему</th></tr>
+      <tr><td>Aspect ratio</td><td>16:9</td><td>Веб-стандарт</td></tr>
+      <tr><td>Resolution</td><td>2K минимум</td><td>1K = дешёво выглядит</td></tr>
+      <tr><td>Background</td><td>clean white</td><td>Бесшовный переход в hero</td></tr>
+      <tr><td>Edges</td><td>no objects touching</td><td>Нужен воздух для вёрстки</td></tr>
+      <tr><td>Batch</td><td>4 генерации</td><td>Качество кадров = качество видео</td></tr>
+    </table>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step step--active" id="step3">
+    <div class="step-num">3</div>
+    <h2>END кадр — Nano Banana 2</h2>
+    <p class="step-sub">Тот же объект, тот же ракурс — но трансформирован по твоей метафоре.</p>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <span><strong>Тот же ракурс и освещение что в START.</strong> Если ракурсы разные — видео не склеится, переход будет рваным.</span>
+    </div>
+
+    <ol style="padding-left:20px;display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+      <li>Снова Nano Banana 2 в Higsfield</li>
+      <li>Вставь PROMPT 2 из шага 1</li>
+      <li>Batch = 4, Generate</li>
+      <li>Выбери кадр где <em>тот же ракурс и освещение</em> что в START</li>
+      <li>Сохрани как <code>end.png</code></li>
+    </ol>
+
+    <p style="margin-bottom:8px"><strong>Хорошие метафоры для END кадра:</strong></p>
+    <table>
+      <tr><th>Тип</th><th>Описание</th><th>Пример</th></tr>
+      <tr><td>«Взорвано»</td><td>Компоненты разлетаются</td><td>сетка → волокна + смола + песок + узлы</td></tr>
+      <tr><td>«Разобрано»</td><td>Части разложены аккуратно</td><td>фургон → мебель/коробки летят наружу</td></tr>
+      <tr><td>«Собрано»</td><td>Хаос → порядок</td><td>россыпь стержней → арматурный каркас</td></tr>
+      <tr><td>«Переродилось»</td><td>Старое → новое</td><td>убитая квартира → современный лофт</td></tr>
+    </table>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step step--active" id="step4">
+    <div class="step-num">4</div>
+    <h2>Видео из 2 картинок</h2>
+    <p class="step-sub">Два варианта. Попробуй lumalabs первым — быстрее и проще.</p>
+
+    <h3 style="font-size:16px;font-weight:700;margin:20px 0 12px">Вариант A — lumalabs.ai (рекомендую)</h3>
+
+    <ol style="padding-left:20px;display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+      <li>Открой <a href="https://lumalabs.ai" target="_blank" style="color:var(--blue)">lumalabs.ai</a> → войди</li>
+      <li>Нажми <strong>«+ New generation»</strong> или <strong>«Dream Machine»</strong></li>
+      <li>В настройках найди <strong>«Start frame» / «End frame»</strong> (иконки кадра слева/справа)</li>
+      <li>Загрузи <code>start.png</code> как начальный кадр</li>
+      <li>Загрузи <code>end.png</code> как конечный кадр</li>
+      <li>В поле промпта вставь PROMPT 3 из шага 1 (или используй текст ниже)</li>
+      <li>Длительность: <strong>5–7 секунд</strong></li>
+      <li>Нажми Generate, дождись (~2-5 минут)</li>
+      <li>Скачай .mp4 → назови <code>hero.mp4</code></li>
+    </ol>
+
+    <div class="prompt-block">
+      <div class="prompt-label">Промпт для lumalabs (скопируй)</div>
+      <p>Smooth product teardown animation, objects gently separate and float outward, cinematic slow motion, no text, no camera shake, seamless transition between states</p>
+    </div>
+
+    <h3 style="font-size:16px;font-weight:700;margin:24px 0 12px">Вариант B — Higsfield + Kling 3.0</h3>
+
+    <ol style="padding-left:20px;display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+      <li>Higsfield → <strong>«Create Video»</strong></li>
+      <li>Модель: <strong>Kling 3.0</strong></li>
+      <li>Загрузи start.png как первый кадр, end.png как последний</li>
+      <li>Вставь PROMPT 3 из шага 1</li>
+      <li>Настройки (КРИТИЧНО):</li>
+    </ol>
+
+    <table>
+      <tr><th>Настройка</th><th>Значение</th><th>Почему</th></tr>
+      <tr><td>Model</td><td>Kling 3.0</td><td>Лучшее качество transitions</td></tr>
+      <tr><td>Duration</td><td>7 секунд</td><td>Оптимум для scroll-scrub</td></tr>
+      <tr><td>Resolution</td><td>1080p</td><td>Стандарт</td></tr>
+      <tr><td>Multi-shot</td><td><span class="badge-off">OFF</span></td><td>Иначе режет на сцены</td></tr>
+      <tr><td>Enhance</td><td><span class="badge-off">OFF</span></td><td>Портит результат</td></tr>
+    </table>
+
+    <div class="callout tip">
+      <span class="callout-icon">✅</span>
+      <span>Скачал .mp4? Скопируй в папку проекта: <code>public/video/hero.mp4</code></span>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step step--active" id="step5">
+    <div class="step-num">5</div>
+    <h2>Next.js + GSAP scroll-scrub</h2>
+    <p class="step-sub">Claude Code реализует компонент. Можно дать ему скилл и видео — он сделает всё сам.</p>
+
+    <h3 style="font-size:16px;font-weight:700;margin:0 0 12px">Быстрый путь — дай задачу Claude Code</h3>
+
+    <div class="callout info">
+      <span class="callout-icon">💡</span>
+      <span>Напиши в Claude Code одно из. Скилл <code>scroll-scrub-hero</code> или <code>3d-website-builder</code> возьмёт управление.</span>
+    </div>
+
+    <div class="skill-invoke">
+      <span class="slash">/</span>scroll-scrub-hero
+    </div>
+    <br>
+    <div class="prompt-block">
+      <div class="prompt-label">Что написать Claude Code</div>
+      <p>«Видео hero.mp4 готово и лежит в public/video/. Реализуй scroll-scrub hero секцию в Next.js: sticky 300vh, GSAP ScrollTrigger управляет video.currentTime, текст fade-out на 30% скролла, mobile autoplay fallback.»</p>
+    </div>
+
+    <h3 style="font-size:16px;font-weight:700;margin:24px 0 12px">Или сделай руками — ключевые файлы</h3>
+
+    <p style="margin-bottom:12px"><strong>1. Скопируй видео:</strong></p>
+    <div class="code-block">
+      <div class="code-header">bash <button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre>cp ~/Downloads/hero.mp4 ./public/video/hero.mp4</pre>
+    </div>
+
+    <p style="margin:16px 0 8px"><strong>2. Создай компонент HeroSection.tsx:</strong></p>
+    <div class="code-block">
+      <div class="code-header">src/components/HeroSection.tsx <button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="kw">'use client'</span>
+<span class="kw">import</span> { <span class="cls">useRef</span>, <span class="cls">useEffect</span> } <span class="kw">from</span> <span class="str">'react'</span>
+<span class="kw">import</span> gsap <span class="kw">from</span> <span class="str">'gsap'</span>
+<span class="kw">import</span> { <span class="cls">ScrollTrigger</span> } <span class="kw">from</span> <span class="str">'gsap/ScrollTrigger'</span>
+
+gsap.<span class="fn">registerPlugin</span>(<span class="cls">ScrollTrigger</span>)
+
+<span class="kw">export default function</span> <span class="fn">HeroSection</span>() {
+  <span class="kw">const</span> sectionRef = <span class="fn">useRef</span>&lt;<span class="cls">HTMLElement</span>&gt;(<span class="kw">null</span>)
+  <span class="kw">const</span> videoRef  = <span class="fn">useRef</span>&lt;<span class="cls">HTMLVideoElement</span>&gt;(<span class="kw">null</span>)
+  <span class="kw">const</span> textRef   = <span class="fn">useRef</span>&lt;<span class="cls">HTMLDivElement</span>&gt;(<span class="kw">null</span>)
+
+  <span class="fn">useEffect</span>(() => {
+    <span class="kw">const</span> video = videoRef.current
+    <span class="kw">const</span> section = sectionRef.current
+    <span class="kw">if</span> (!video || !section) <span class="kw">return</span>
+
+    <span class="cmt">// prefers-reduced-motion → autoplay, no scrub</span>
+    <span class="kw">if</span> (window.<span class="fn">matchMedia</span>(<span class="str">'(prefers-reduced-motion: reduce)'</span>).matches) {
+      video.autoplay = <span class="kw">true</span>; video.loop = <span class="kw">true</span>; <span class="kw">return</span>
+    }
+    <span class="cmt">// mobile → autoplay loop fallback</span>
+    <span class="kw">if</span> (window.<span class="fn">matchMedia</span>(<span class="str">'(max-width: 768px)'</span>).matches) {
+      video.autoplay = <span class="kw">true</span>; video.loop = <span class="kw">true</span>; <span class="kw">return</span>
+    }
+
+    <span class="cmt">// scroll → video.currentTime</span>
+    <span class="cls">ScrollTrigger</span>.<span class="fn">create</span>({
+      trigger: section, start: <span class="str">'top top'</span>, end: <span class="str">'bottom bottom'</span>,
+      scrub: <span class="num">0.5</span>,
+      <span class="fn">onUpdate</span>: (self) => {
+        <span class="kw">if</span> (video.duration)
+          video.currentTime = self.progress * video.duration
+      },
+    })
+
+    <span class="cmt">// текст исчезает в первые 30% скролла</span>
+    gsap.<span class="fn">to</span>(textRef.current, {
+      opacity: <span class="num">0</span>, y: <span class="num">-40</span>,
+      scrollTrigger: { trigger: section, start: <span class="str">'top top'</span>,
+                       end: <span class="str">'30% top'</span>, scrub: <span class="kw">true</span> },
+    })
+
+    <span class="kw">return</span> () => <span class="cls">ScrollTrigger</span>.<span class="fn">getAll</span>().<span class="fn">forEach</span>(t => t.<span class="fn">kill</span>())
+  }, [])
+
+  <span class="kw">return</span> (
+    &lt;section ref={sectionRef} style={{ height: <span class="str">'300vh'</span> }}&gt;
+      &lt;div className=<span class="str">"sticky top-0 h-screen overflow-hidden bg-white"</span>&gt;
+
+        &lt;<span class="cls">video</span> ref={videoRef} src=<span class="str">"/video/hero.mp4"</span>
+          muted playsInline preload=<span class="str">"auto"</span>
+          className=<span class="str">"absolute inset-0 w-full h-full object-contain"</span> /&gt;
+
+        &lt;div className=<span class="str">"absolute inset-y-0 left-0 w-1/2
+             bg-gradient-to-r from-[#0F0F0F] to-transparent"</span> /&gt;
+
+        &lt;div ref={textRef}
+             className=<span class="str">"absolute left-8 top-1/2 -translate-y-1/2 z-10 max-w-lg"</span>&gt;
+          &lt;h1 className=<span class="str">"font-extrabold text-4xl text-white mb-4"</span>&gt;
+            Твой заголовок
+          &lt;/h1&gt;
+          &lt;a href=<span class="str">"tel:+7XXXXXXXXXX"</span>
+             className=<span class="str">"bg-[#FF6B00] text-white px-6 py-3 rounded-lg"</span>&gt;
+            Позвонить
+          &lt;/a&gt;
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+    &lt;/section&gt;
+  )
+}</pre>
+    </div>
+
+    <p style="margin:16px 0 8px"><strong>3. Подключи в page.tsx:</strong></p>
+    <div class="code-block">
+      <div class="code-header">src/app/page.tsx <button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="kw">import</span> <span class="cls">HeroSection</span> <span class="kw">from</span> <span class="str">'@/components/HeroSection'</span>
+
+<span class="kw">export default function</span> <span class="fn">Home</span>() {
+  <span class="kw">return</span> &lt;main&gt;&lt;<span class="cls">HeroSection</span> /&gt;&lt;/main&gt;
+}</pre>
+    </div>
+
+    <p style="margin:16px 0 8px"><strong>4. Инициализируй Lenis (плавный скролл):</strong></p>
+    <div class="code-block">
+      <div class="code-header">src/components/SmoothScroll.tsx <button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="kw">'use client'</span>
+<span class="kw">import</span> { <span class="cls">useEffect</span> } <span class="kw">from</span> <span class="str">'react'</span>
+<span class="kw">import</span> <span class="cls">Lenis</span> <span class="kw">from</span> <span class="str">'@studio-freight/lenis'</span>
+
+<span class="kw">export function</span> <span class="fn">SmoothScroll</span>({ children }: { children: <span class="cls">React</span>.<span class="cls">ReactNode</span> }) {
+  <span class="fn">useEffect</span>(() => {
+    <span class="kw">const</span> lenis = <span class="kw">new</span> <span class="cls">Lenis</span>()
+    <span class="kw">const</span> <span class="fn">raf</span> = (time: <span class="kw">number</span>) => { lenis.<span class="fn">raf</span>(time); <span class="fn">requestAnimationFrame</span>(raf) }
+    <span class="fn">requestAnimationFrame</span>(raf)
+    <span class="kw">return</span> () => lenis.<span class="fn">destroy</span>()
+  }, [])
+  <span class="kw">return</span> &lt;&gt;{children}&lt;/&gt;
+}</pre>
+    </div>
+
+    <p style="margin:16px 0 8px"><strong>5. Проверь что работает:</strong></p>
+    <div class="code-block">
+      <div class="code-header">bash <button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre>npm run dev       <span class="cmt"># открой localhost:3000, скролль вниз</span>
+npm run build     <span class="cmt"># должен собраться без ошибок</span>
+npm run lint      <span class="cmt"># чистый lint</span></pre>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step step--active" id="step6">
+    <div class="step-num">6</div>
+    <h2>Деплой на Vercel</h2>
+    <p class="step-sub">Через скилл ship-to-vercel или вручную за 2 команды</p>
+
+    <h3 style="font-size:16px;font-weight:700;margin:0 0 12px">Через Claude Code (рекомендую)</h3>
+
+    <div class="skill-invoke">
+      <span class="slash">/</span>ship-to-vercel
+    </div>
+    <br>
+    <div style="color:var(--muted);font-size:13px;margin:4px 0 16px">— Claude сам сделает git push + vercel deploy --prod</div>
+
+    <h3 style="font-size:16px;font-weight:700;margin:16px 0 12px">Вручную</h3>
+    <div class="code-block">
+      <div class="code-header">bash <button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="cmt"># 1. Если репо ещё нет</span>
+git init -b main
+gh repo create my-hero-site --public --source=. --push
+
+<span class="cmt"># 2. Линкуй с Vercel (первый раз)</span>
+vercel link
+
+<span class="cmt"># 3. Деплой в прод</span>
+git add . && git commit -m "Add scroll-scrub hero"
+vercel deploy --prod</pre>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <span>Если после <code>git push</code> Vercel auto-deploy не стартует — запускай <code>vercel deploy --prod</code> вручную. Это известный глюк когда auto-deploy не триггерится.</span>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">✅</span>
+      <span>Видео .mp4 в <code>public/</code> — Vercel отдаёт статику напрямую. Никаких дополнительных настроек для видео не нужно.</span>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ANTI-PATTERNS -->
+  <div id="antipatterns">
+    <div class="section-header">Осторожно</div>
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:20px">Антипаттерны — что убивает эффект</h2>
+
+    <table>
+      <tr><th>❌ Ошибка</th><th>✅ Правильно</th></tr>
+      <tr><td>Генерить кадры в 1K разрешении</td><td>Минимум 2K (1920×1080)</td></tr>
+      <tr><td>Разные ракурсы START и END</td><td>Тот же ракурс, то же освещение</td></tr>
+      <tr><td>Текст в промпте для видео (Kling)</td><td>Никакого текста — замыливается</td></tr>
+      <tr><td>multi-shot ON / enhance ON в Kling</td><td>Оба <span class="badge-off">OFF</span></td></tr>
+      <tr><td><code>preload</code> не указан на <code>&lt;video&gt;</code></td><td><code>preload="auto"</code> — иначе скролл лагает</td></tr>
+      <tr><td>ScrollTrigger на мобильном без fallback</td><td>Проверяй <code>max-width: 768px</code> → autoplay</td></tr>
+      <tr><td>Объекты касаются краёв кадра</td><td><code>no objects touching the edges</code> в промпте</td></tr>
+      <tr><td>Фон не белый (градиент, серый)</td><td><code>clean white seamless background</code></td></tr>
+    </table>
+  </div>
+
+  <hr>
+
+  <!-- SKILLS MAP -->
+  <div>
+    <div class="section-header">Карта скиллов</div>
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:16px">Какой скилл вызвать когда</h2>
+    <table>
+      <tr><th>Когда</th><th>Команда в Claude Code</th></tr>
+      <tr>
+        <td>Нужны промпты для Nano Banana 2</td>
+        <td><div class="skill-invoke" style="margin:0"><span class="slash">/</span>scroll-stop-prompter</div></td>
+      </tr>
+      <tr>
+        <td>Есть видео, нужен полный hero в Next.js</td>
+        <td><div class="skill-invoke" style="margin:0"><span class="slash">/</span>scroll-scrub-hero</div></td>
+      </tr>
+      <tr>
+        <td>Есть видео, нужен vanilla HTML MVP</td>
+        <td><div class="skill-invoke" style="margin:0"><span class="slash">/</span>3d-website-builder</div></td>
+      </tr>
+      <tr>
+        <td>Деплой на Vercel</td>
+        <td><div class="skill-invoke" style="margin:0"><span class="slash">/</span>ship-to-vercel</div></td>
+      </tr>
+      <tr>
+        <td>Весь пайплайн с нуля, одной командой</td>
+        <td><div class="skill-invoke" style="margin:0"><span class="slash">/</span>scroll-scrub-hero</div></td>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<footer>
+  <p>Создано с <a href="https://github.com/sergeyramas/scroll-scrub-hero-skill">scroll-scrub-hero skill</a> ·
+  <a href="https://sergeyramas.vercel.app">sergeyramas.vercel.app</a></p>
+</footer>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre')
+  const text = pre.innerText
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!'
+    btn.classList.add('copied')
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied') }, 2000)
+  })
+}
+</script>
+
+</body>
+</html>
