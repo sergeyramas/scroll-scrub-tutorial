@@ -387,8 +387,9 @@
       <li><a href="#step2">Шаг 2 — START кадр</a></li>
       <li><a href="#step3">Шаг 3 — END кадр</a></li>
       <li><a href="#step4">Шаг 4 — Видео из 2 картинок</a></li>
-      <li><a href="#step5">Шаг 5 — Next.js + GSAP</a></li>
-      <li><a href="#step6">Шаг 6 — Деплой</a></li>
+      <li><a href="#step5">Шаг 5 — Сборка сайта (3 скилла)</a></li>
+      <li><a href="#step6">Шаг 6 — Next.js вручную</a></li>
+      <li><a href="#step7">Шаг 7 — Деплой</a></li>
       <li><a href="#antipatterns">Антипаттерны</a></li>
     </ol>
   </div>
@@ -408,11 +409,11 @@
       </div>
     </div>
 
-    <div class="tool-card">
-      <div class="tool-icon" style="background:rgba(77,159,255,0.15)">🌊</div>
+    <div class="tool-card" style="border-color:rgba(0,200,117,0.35)">
+      <div class="tool-icon" style="background:rgba(0,200,117,0.15)">🌊</div>
       <div>
-        <h4>lumalabs.ai — Dream Machine</h4>
-        <p>Создание видео из 2 изображений. Режим <strong>«Start / End frame»</strong>. Бесплатно: 30 генераций/месяц.</p>
+        <h4>lumalabs.ai — Dream Machine <span style="background:rgba(0,200,117,0.2);color:var(--green);font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:6px">БЕСПЛАТНО</span></h4>
+        <p>Создание видео из 2 изображений. Режим <strong>«Start / End frame»</strong>. <strong>30 генераций/месяц бесплатно.</strong> Начни отсюда — не надо платить.</p>
         <a href="https://lumalabs.ai" class="tool-link" target="_blank">→ lumalabs.ai</a>
       </div>
     </div>
@@ -420,10 +421,15 @@
     <div class="tool-card">
       <div class="tool-icon" style="background:rgba(176,96,255,0.15)">🎬</div>
       <div>
-        <h4>Higsfield → Kling 3.0 (альтернатива)</h4>
-        <p>Более кинематографичный переход. Тот же Higsfield аккаунт → Create Video → Kling 3.0.</p>
+        <h4>Higsfield → Kling 3.0 <span style="background:rgba(255,107,0,0.15);color:var(--accent2);font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:6px">~$15/мес</span></h4>
+        <p>Более кинематографичный переход чем Luma. Платная подписка ~$15/мес. Используй только если нужно максимальное качество или уже есть подписка на Higsfield для Nano Banana.</p>
         <a href="https://higsfield.ai" class="tool-link" target="_blank">→ higsfield.ai</a>
       </div>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <span><strong>Стратегия:</strong> Nano Banana 2 (Higsfield, нужна подписка) для кадров → lumalabs.ai <strong>бесплатно</strong> для видео. Так получаешь лучшее качество генерации + ноль затрат на видео.</span>
     </div>
 
     <div class="tool-card">
@@ -621,29 +627,101 @@ No text, no camera shake. Kling 3.0, multi-shot off, enhance off.</pre>
     </div>
   </div>
 
-  <!-- STEP 5 -->
+  <!-- STEP 5 — SKILLS -->
   <div class="step step--active" id="step5">
     <div class="step-num">5</div>
-    <h2>Next.js + GSAP scroll-scrub</h2>
-    <p class="step-sub">Claude Code реализует компонент. Можно дать ему скилл и видео — он сделает всё сам.</p>
-
-    <h3 style="font-size:16px;font-weight:700;margin:0 0 12px">Быстрый путь — дай задачу Claude Code</h3>
+    <h2>Сборка сайта — выбери скилл</h2>
+    <p class="step-sub">Три скилла Claude Code. Каждый берёт готовое .mp4 и строит сайт — разного уровня сложности.</p>
 
     <div class="callout info">
       <span class="callout-icon">💡</span>
-      <span>Напиши в Claude Code одно из. Скилл <code>scroll-scrub-hero</code> или <code>3d-website-builder</code> возьмёт управление.</span>
+      <span>Видео <code>hero.mp4</code> уже готово — просто скажи Claude Code одно из слов-триггеров. Скилл сам задаст вопросы (бренд, цвет, CTA) и соберёт сайт.</span>
     </div>
 
-    <div class="skill-invoke">
-      <span class="slash">/</span>scroll-scrub-hero
-    </div>
-    <br>
-    <div class="prompt-block">
-      <div class="prompt-label">Что написать Claude Code</div>
-      <p>«Видео hero.mp4 готово и лежит в public/video/. Реализуй scroll-scrub hero секцию в Next.js: sticky 300vh, GSAP ScrollTrigger управляет video.currentTime, текст fade-out на 30% скролла, mobile autoplay fallback.»</p>
+    <!-- SKILL 1: 3d-animation-creator -->
+    <div style="background:var(--surface);border:1px solid #30305a;border-radius:12px;padding:24px;margin:20px 0">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="background:rgba(176,96,255,0.2);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:#b060ff;text-transform:uppercase;letter-spacing:0.1em">⭐ Рекомендую</div>
+        <div class="skill-invoke" style="margin:0"><span class="slash">/</span>3d-animation-creator</div>
+      </div>
+      <h3 style="font-size:17px;font-weight:700;margin-bottom:8px">Apple-style: FFmpeg кадры + canvas</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Самый мощный скилл. Разбивает видео на кадры через FFmpeg, рендерит через <code>&lt;canvas&gt;</code> (как Apple iPhone teardown). Строит полный сайт из одного HTML-файла с:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        <div style="background:var(--surface2);border-radius:6px;padding:8px 12px;font-size:12px">✨ Annotation cards со snap-stop</div>
+        <div style="background:var(--surface2);border-radius:6px;padding:8px 12px;font-size:12px">🌟 Анимированный starscape</div>
+        <div style="background:var(--surface2);border-radius:6px;padding:8px 12px;font-size:12px">📊 Specs с count-up анимацией</div>
+        <div style="background:var(--surface2);border-radius:6px;padding:8px 12px;font-size:12px">🔄 Navbar → pill при скролле</div>
+        <div style="background:var(--surface2);border-radius:6px;padding:8px 12px;font-size:12px">💳 Glass-morphism feature cards</div>
+        <div style="background:var(--surface2);border-radius:6px;padding:8px 12px;font-size:12px">🎭 Loader + progress bar</div>
+      </div>
+      <p style="font-size:13px;margin-bottom:12px"><strong>Триггер-фразы:</strong></p>
+      <div class="prompt-block" style="margin:0">
+        <div class="prompt-label">Что написать в Claude Code</div>
+        <p>«Вот видео hero.mp4. Собери полный сайт с Apple-style scroll анимацией. Бренд: ROCKMESH. Цвет: #FF6B00. Фон: тёмный.»</p>
+      </div>
+      <div class="callout warn" style="margin-top:12px">
+        <span class="callout-icon">⚠️</span>
+        <span><strong>Нужен FFmpeg:</strong> <code>brew install ffmpeg</code> — иначе скилл не сможет извлечь кадры. Первый кадр видео должен быть на белом фоне.</span>
+      </div>
     </div>
 
-    <h3 style="font-size:16px;font-weight:700;margin:24px 0 12px">Или сделай руками — ключевые файлы</h3>
+    <!-- SKILL 2: 3d-website-builder -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin:16px 0">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="background:rgba(0,200,117,0.12);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:0.1em">Быстро</div>
+        <div class="skill-invoke" style="margin:0"><span class="slash">/</span>3d-website-builder</div>
+      </div>
+      <h3 style="font-size:17px;font-weight:700;margin-bottom:8px">Vanilla HTML + GSAP video.currentTime</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Берёт готовый .mp4 и строит MVP-сайт на чистом HTML/CSS/JS. Не нужен FFmpeg — напрямую использует <code>video.currentTime</code> через GSAP ScrollTrigger. Готово к деплою за минуты.</p>
+      <div class="prompt-block">
+        <div class="prompt-label">Что написать в Claude Code</div>
+        <p>«Видео готово: ./assets/hero.mp4. Собери MVP сайт с scroll-stop анимацией. Бренд: ROCKMESH, акцент #FF6B00, CTA: Позвонить.»</p>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px">Выдаёт: <code>index.html</code> + <code>css/style.css</code> + <code>js/scroll.js</code> + README</p>
+    </div>
+
+    <!-- SKILL 3: scroll-scrub-hero -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin:16px 0">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="background:rgba(77,159,255,0.12);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:0.1em">Next.js</div>
+        <div class="skill-invoke" style="margin:0"><span class="slash">/</span>scroll-scrub-hero</div>
+      </div>
+      <h3 style="font-size:17px;font-weight:700;margin-bottom:8px">Next.js 16 + TypeScript + Tailwind</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Для проектов на Next.js. Создаёт <code>HeroSection.tsx</code> с GSAP ScrollTrigger, тултипами компонентов, Lenis smooth scroll и mobile autoplay fallback.</p>
+      <div class="prompt-block">
+        <div class="prompt-label">Что написать в Claude Code</div>
+        <p>«Видео hero.mp4 в public/video/. Реализуй scroll-scrub hero в Next.js: sticky 300vh, GSAP scrub, fade-out текста, mobile fallback.»</p>
+      </div>
+    </div>
+
+    <!-- Comparison table -->
+    <h3 style="font-size:15px;font-weight:700;margin:24px 0 12px">Сравнение скиллов</h3>
+    <table>
+      <tr><th>Скилл</th><th>Метод рендера</th><th>FFmpeg</th><th>Результат</th><th>Когда выбирать</th></tr>
+      <tr>
+        <td><code>/3d-animation-creator</code></td>
+        <td>Canvas + кадры</td>
+        <td><span class="badge-on">Нужен</span></td>
+        <td>Полный сайт HTML</td>
+        <td>Хочешь Apple-style wow + полный лендинг</td>
+      </tr>
+      <tr>
+        <td><code>/3d-website-builder</code></td>
+        <td>video.currentTime</td>
+        <td><span class="badge-on">Не нужен</span></td>
+        <td>MVP vanilla HTML</td>
+        <td>Быстрый прототип без фреймворка</td>
+      </tr>
+      <tr>
+        <td><code>/scroll-scrub-hero</code></td>
+        <td>video.currentTime</td>
+        <td><span class="badge-on">Не нужен</span></td>
+        <td>Next.js компонент</td>
+        <td>Уже есть Next.js проект</td>
+      </tr>
+    </table>
+
+    <h3 style="font-size:16px;font-weight:700;margin:28px 0 12px" id="step6">Или сделай вручную — ключевые файлы Next.js</h3>
 
     <p style="margin-bottom:12px"><strong>1. Скопируй видео:</strong></p>
     <div class="code-block">
@@ -765,9 +843,9 @@ npm run lint      <span class="cmt"># чистый lint</span></pre>
     </div>
   </div>
 
-  <!-- STEP 6 -->
-  <div class="step step--active" id="step6">
-    <div class="step-num">6</div>
+  <!-- STEP 7 -->
+  <div class="step step--active" id="step7">
+    <div class="step-num">7</div>
     <h2>Деплой на Vercel</h2>
     <p class="step-sub">Через скилл ship-to-vercel или вручную за 2 команды</p>
 
